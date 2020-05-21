@@ -8,8 +8,9 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.pc = 0
-        self.reg = [0] * 8     ##8-bit register
-        self.ram = [0] * 256   ##256-bit RAM
+        self.reg = [0] * 256   
+        self.ram = [0] * 64   
+        self.stack_pointer = 0xF3
 
     def ram_read(self, mar):
         return self.ram[mar]
@@ -84,6 +85,8 @@ class CPU:
         LDI = 0b10000010  ##Load  = 130
         PRN = 0b01000111  ##Print = 71
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
 
         running = True
         IR = self.pc
@@ -109,10 +112,25 @@ class CPU:
                 print(self.reg[opr_a])
                 IR += 2
 
+            #if inctruc is MULTIPLY
             elif instruction == MUL:
                 self.alu("MUL", opr_a, opr_b)
                 IR += 3 
                 print('you are MULTIPLYING')
+            
+            # PUSH
+            elif instruction == PUSH:
+                # register = self.ram[opr_a]
+                self.stack_pointer -= 1
+                self.reg[self.stack_pointer] = self.reg[self.ram[opr_a]]
+                IR += 2
+            
+            # POP
+            elif instruction == POP:
+                # register = self.ram[opr_a]
+                self.reg[self.ram[opr_a]] = self.reg[self.stack_pointer]
+                self.stack_pointer += 1
+                IR += 2
 
             else:
                 print(f"bad input: {bin(instruction)}")
